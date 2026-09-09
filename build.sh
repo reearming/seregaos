@@ -24,6 +24,7 @@ echo "==> Compiling kernel..."
     -fno-pie \
     -fno-pic \
     -m64 \
+    -mcmodel=kernel \
     -mno-red-zone \
     -fno-asynchronous-unwind-tables \
     -fno-unwind-tables \

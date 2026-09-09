@@ -30,17 +30,18 @@ void put_pixel(uint32_t x, uint32_t y, uint32_t color, struct limine_framebuffer
     pixpoint[x + (y * (fb.pitch / 4))] = color;
 }
 
-void put_char(uint32_t x, uint32_t y, uint32_t color, struct limine_framebuffer fb, char letter)
+void put_char(uint32_t x, uint32_t y, uint32_t color, struct limine_framebuffer fb, const uint8_t letter[])
 {
     uint32_t *pixpoint = (uint32_t *)fb.address;
 
-    const uint8_t bitmap[8] = A;
-
     for (uint32_t i = 0; i < 8; i++)
     { 
-        for (uint32_t j = 0; j < 8; j++)
+        for (uint32_t j = 8; j > 0; j--)
         {
-            pixpoint[x + j + ((y + i) * (fb.pitch / 4))] = color;
+            if (letter[i]>>j & 1)
+            {
+                pixpoint[x - j + ((y + i) * fb.pitch / 4)] = color;
+            }
         }
      }
 }
@@ -60,7 +61,8 @@ void kmain(void) {
         }
     }*/
 
-    put_char(50, 20, 0xFFFFFF, *framebuffer, 'A');
+    put_char(50, 65, 0xFFFFFF, *framebuffer, Z);
+    put_char(60, 65, 0xFFFFFF, *framebuffer, Z);
 
     for (;;) { }
 }

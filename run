@@ -1,8 +1,15 @@
 #!/bin/bash
 
+set -e
+
+PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+cp /usr/share/edk2/x64/OVMF_VARS.4m.fd \
+   /tmp/OVMF_VARS.fd
+
 qemu-system-x86_64 \
     -M q35 \
     -m 256M \
     -drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
-    -drive if=pflash,format=raw,file=/tmp/myos-vars.fd \
-    -cdrom serega.iso
+    -drive if=pflash,format=raw,file=/tmp/OVMF_VARS.fd \
+    -cdrom "$PROJECT_DIR/serega.iso"
