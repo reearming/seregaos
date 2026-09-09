@@ -77,10 +77,10 @@ void kmain(void) {
     put_char(149, 65, 0xFFFFFF, *framebuffer, Empty);
     put_char(158, 65, 0xFFFFFF, *framebuffer, K);
     put_char(167, 65, 0xFFFFFF, *framebuffer, E);
-    put_char(186, 65, 0xFFFFFF, *framebuffer, R);
-    put_char(195, 65, 0xFFFFFF, *framebuffer, N);
-    put_char(204, 65, 0xFFFFFF, *framebuffer, E);
-    put_char(213, 65, 0xFFFFFF, *framebuffer, L);
+    put_char(176, 65, 0xFFFFFF, *framebuffer, R);
+    put_char(185, 65, 0xFFFFFF, *framebuffer, N);
+    put_char(194, 65, 0xFFFFFF, *framebuffer, E);
+    put_char(203, 65, 0xFFFFFF, *framebuffer, L);
 
     for (;;) { }
 }
