@@ -17,11 +17,11 @@ struct InterruptRegs {
 };
 
 void printkey() {
-    uint8_t scancode = inb(0x60);
+    //uint8_t scancode = inb(0x60);
 
     print_char('A', 0xFFFFFF);
 
-    outb(PIC1_COMMAND, PIC_EOI);
+    //outb(PIC1_COMMAND, PIC_EOI);
 }
 
 void excstop(const char *out) {

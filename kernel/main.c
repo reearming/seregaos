@@ -38,7 +38,7 @@ void kmain(void) {
 
     framebuffer_init(framebuffer);
     
-        //int a = 5 / 0;
+        int a = 5 / 0;
 
     
     /*for (size_t i = 0; i < framebuffer->width; i++)
