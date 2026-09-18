@@ -26,18 +26,20 @@ static volatile uint64_t limine_requests_end_marker[] =
     LIMINE_REQUESTS_END_MARKER;
 
 void kmain(void) {
+    setGdt();
+    idtinit();
+
+    if (framebuffer_request.response == NULL || framebuffer_request.response->framebuffer_count < 1)
+    {
+        for (;;) asm volatile("hlt");
+    }
+
     struct limine_framebuffer *framebuffer = framebuffer_request.response->framebuffers[0];
 
     framebuffer_init(framebuffer);
     
-    setGdt();
-    idtinit();
-    //int a = 5 / 0;
+        //int a = 5 / 0;
 
-    if (framebuffer_request.response == NULL || framebuffer_request.response->framebuffer_count < 1)
-    {
-        for (;;) asm("hlt");
-    }
     
     /*for (size_t i = 0; i < framebuffer->width; i++)
     {
@@ -49,5 +51,5 @@ void kmain(void) {
     //print("THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG\0");
     //print("A\0");
 
-    for (;;) asm("hlt");
+    for (;;) asm volatile("hlt");
 }

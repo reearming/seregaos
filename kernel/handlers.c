@@ -2,9 +2,6 @@
 #include <stdint.h>
 #include "IO.h"
 
-#define PIC1_COMMAND 0x20
-#define PIC_EOI 0x20 
-
 struct InterruptRegs {
     uint64_t r15, r14, r13, r12, r11, r10, r9, r8;
     uint64_t rbp, rsi, rdi, rdx, rcx, rbx, rax;

@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include "handlers.h"
+#include "IO.h"
 
 struct InterruptDescriptor64 {
    uint16_t offset_1;        // offset bits 0..15
@@ -31,6 +32,8 @@ void idtgateset(void *addr, uint16_t selector, uint8_t ist, uint8_t type_attribu
 }
 
 void idtinit() {
+    disablepic();
+
     struct idtr idtr;
     idtr.limit = (uint16_t)sizeof(struct InterruptDescriptor64);
     idtr.base = (uint64_t)&idt;
@@ -38,6 +41,6 @@ void idtinit() {
     idtgateset(isr_33, 0x08, 0, 0x8E, 33);
     idtgateset(isr_0, 0x08, 0, 0x8E, 0);
 
-    __asm__ volatile("lidt %0" : : "m"(idtr));
-    __asm__ volatile("sti");
+    asm volatile("lidt %0" : : "m"(idtr));
+    asm volatile("sti");
 }
