@@ -40,6 +40,35 @@ echo "==> Compiling kernel..."
     -c "$KERNEL_DIR/fbuffer.c" \
     -o "$KERNEL_DIR/fbuffer.o"
 
+"$CC" \
+    -ffreestanding \
+    -fno-stack-protector \
+    -fno-pie \
+    -fno-pic \
+    -m64 \
+    -mcmodel=kernel \
+    -mno-red-zone \
+    -fno-asynchronous-unwind-tables \
+    -fno-unwind-tables \
+    -c "$KERNEL_DIR/keyboard.c" \
+    -o "$KERNEL_DIR/keyboard.o"
+
+"$CC" \
+    -ffreestanding \
+    -fno-stack-protector \
+    -fno-pie \
+    -fno-pic \
+    -m64 \
+    -mcmodel=kernel \
+    -mno-red-zone \
+    -fno-asynchronous-unwind-tables \
+    -fno-unwind-tables \
+    -c "$KERNEL_DIR/idt.c" \
+    -o "$KERNEL_DIR/idt.o"
+
+
+nasm -f elf64 "$KERNEL_DIR/gdt.asm" -o "$KERNEL_DIR/gdt.o"
+
 echo "==> Linking kernel..."
 
 "$LD" \
@@ -47,7 +76,10 @@ echo "==> Linking kernel..."
     -T "$PROJECT_DIR/linker.ld" \
     -o "$PROJECT_DIR/kernel.elf" \
     "$KERNEL_DIR/main.o" \
-    "$KERNEL_DIR/fbuffer.o"
+    "$KERNEL_DIR/fbuffer.o" \
+    "$KERNEL_DIR/gdt.o" \
+    "$KERNEL_DIR/idt.o" \
+    "$KERNEL_DIR/keyboard.o"
 
 echo "==> Preparing ISO..."
 

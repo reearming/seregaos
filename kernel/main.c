@@ -1,8 +1,10 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "limine.h"
-#include "font.h"
 #include "fbuffer.h"
+#include "idt.h"
+
+extern void setGdt(void);
 
 __attribute__((used, section(".limine_requests_start")))
 static volatile uint64_t limine_requests_start_marker[] =
@@ -24,13 +26,19 @@ static volatile uint64_t limine_requests_end_marker[] =
     LIMINE_REQUESTS_END_MARKER;
 
 void kmain(void) {
+    struct limine_framebuffer *framebuffer = framebuffer_request.response->framebuffers[0];
+
+    framebuffer_init(framebuffer);
+    
+    setGdt();
+    idtinit();
+    int a = 5 / 0;
+
     if (framebuffer_request.response == NULL || framebuffer_request.response->framebuffer_count < 1)
     {
         for (;;) asm("hlt");
     }
     
-    struct limine_framebuffer *framebuffer = framebuffer_request.response->framebuffers[0];
-
     /*for (size_t i = 0; i < framebuffer->width; i++)
     {
         for (size_t j = 0; j < framebuffer->height; j++) {
@@ -38,9 +46,8 @@ void kmain(void) {
         }
     }*/
 
-    framebuffer_init(framebuffer);
-
     print("THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG\0");
+    print("A\0");
 
-    for (;;) { }
+    for (;;) asm("hlt");
 }
