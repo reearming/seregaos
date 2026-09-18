@@ -32,7 +32,7 @@ void kmain(void) {
     
     setGdt();
     idtinit();
-    int a = 5 / 0;
+    //int a = 5 / 0;
 
     if (framebuffer_request.response == NULL || framebuffer_request.response->framebuffer_count < 1)
     {

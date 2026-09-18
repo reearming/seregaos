@@ -35,8 +35,8 @@ void idtinit() {
     idtr.limit = (uint16_t)sizeof(struct InterruptDescriptor64);
     idtr.base = (uint64_t)&idt;
 
-    idtgateset(printkey, 0x08, 0, 0x8E, 33);
-    idtgateset(printkey, 0x08, 0, 0x8E, 0);
+    idtgateset(isr_33, 0x08, 0, 0x8E, 33);
+    idtgateset(isr_0, 0x08, 0, 0x8E, 0);
 
     __asm__ volatile("lidt %0" : : "m"(idtr));
     __asm__ volatile("sti");

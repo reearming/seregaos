@@ -71,7 +71,7 @@ echo "==> Compiling kernel..."
 
 
 "$ASM" -f elf64 "$KERNEL_DIR/gdt.asm" -o "$OUTPUT_DIR/gdt.o"
-"$ASM" -f elf64 "$KERNEL_DIR/keyboard.asm" -o "$OUTPUT_DIR/keyboard.o"
+"$ASM" -f elf64 "$KERNEL_DIR/handlers.asm" -o "$OUTPUT_DIR/asmhandlers.o"
 
 
 echo "==> Linking kernel..."
@@ -85,7 +85,7 @@ echo "==> Linking kernel..."
     "$OUTPUT_DIR/gdt.o" \
     "$OUTPUT_DIR/idt.o" \
     "$OUTPUT_DIR/handlers.o" \
-    "$OUTPUT_DIR/keyboard.o"
+    "$OUTPUT_DIR/asmhandlers.o"
 
 echo "==> Preparing ISO..."
 

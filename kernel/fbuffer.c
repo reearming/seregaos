@@ -40,8 +40,13 @@ void put_char(uint32_t x, uint32_t y, uint32_t color,
 
 void print_char(const char c, uint32_t color)
 {
+    if (c == '\n') {
+        cursor_x = 0;
+        cursor_y += 8;
+    }
+
     put_char(cursor_x, cursor_y, color, *framebuffer, font[c]);
-    cursor_x += 8;
+    cursor_x += font_advance[c];
 
     if (cursor_x + 8 > framebuffer->width) {
         cursor_x = 0;

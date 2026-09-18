@@ -1,10 +1,11 @@
 bits 64
 
-global printkey
-extern printkey_c
+global commonstub
+extern interruptdis
 
 section .text
-printkey:
+
+%macro PUSH_ALL 0
     push rax
     push rbx
     push rcx
@@ -19,9 +20,9 @@ printkey:
     push r12
     push r13
     push r15
+%endmacro
 
-    call printkey_c
-
+%macro POP_ALL 0
     pop r15
     pop r14
     pop r13
@@ -37,6 +38,26 @@ printkey:
     pop rcx
     pop rbx
     pop rax
+%endmacro
 
+commonstub:
+    PUSH_ALL
+    
+    mov rdi, rsp
+    call interruptdis
+
+    POP_ALL
+    add rsp, 16
     iretq
 
+%macro ISR_NOERRORCODE 1
+global isr_%1
+isr_%1:
+    push qword r10
+    push qword %1
+    jmp commonstub
+%endmacro
+
+
+ISR_NOERRORCODE 0
+ISR_NOERRORCODE 33
