@@ -2,6 +2,4 @@ esp.img
 iso_root/
 kernel.elf
 serega.iso
-kernel/main.o
-kernel/fbuffer.o
-
+out/

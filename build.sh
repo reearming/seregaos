@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 set -e
@@ -10,6 +9,7 @@ ISO_ROOT="$PROJECT_DIR/iso_root"
 ISO="$PROJECT_DIR/serega.iso"
 
 OUTPUT_DIR="$PROJECT_DIR/out"
+mkdir -p "$PROJECT_DIR/out"
 
 CC="gcc"
 LD="ld"
@@ -70,8 +70,8 @@ echo "==> Compiling kernel..."
     -o "$OUTPUT_DIR/idt.o"
 
 
-"$ASM" -f elf64 "$KERNEL_DIR/gdt.asm" -o "$KERNEL_DIR/gdt.o"
-"$ASM" -f elf64 "$KERNEL_DIR/keyboard.asm" -o "$KERNEL_DIR/keyboard.o"
+"$ASM" -f elf64 "$KERNEL_DIR/gdt.asm" -o "$OUTPUT_DIR/gdt.o"
+"$ASM" -f elf64 "$KERNEL_DIR/keyboard.asm" -o "$OUTPUT_DIR/keyboard.o"
 
 
 echo "==> Linking kernel..."
@@ -84,8 +84,8 @@ echo "==> Linking kernel..."
     "$OUTPUT_DIR/fbuffer.o" \
     "$OUTPUT_DIR/gdt.o" \
     "$OUTPUT_DIR/idt.o" \
-    "$OUTPUT_DIR/keyboard.o" \
-    "$OUTPUT_DIR/keyboardasm.o"
+    "$OUTPUT_DIR/handlers.o" \
+    "$OUTPUT_DIR/keyboard.o"
 
 echo "==> Preparing ISO..."
 
