@@ -3,6 +3,7 @@ bits 64
 global printkey
 extern printkey_c
 
+section .text
 printkey:
     push rax
     push rbx

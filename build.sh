@@ -9,8 +9,11 @@ KERNEL_DIR="$PROJECT_DIR/kernel"
 ISO_ROOT="$PROJECT_DIR/iso_root"
 ISO="$PROJECT_DIR/serega.iso"
 
+OUTPUT_DIR="$PROJECT_DIR/out"
+
 CC="gcc"
 LD="ld"
+ASM="nasm"
 
 echo "==> Compiling kernel..."
 
@@ -25,7 +28,7 @@ echo "==> Compiling kernel..."
     -fno-asynchronous-unwind-tables \
     -fno-unwind-tables \
     -c "$KERNEL_DIR/main.c" \
-    -o "$KERNEL_DIR/main.o"
+    -o "$OUTPUT_DIR/main.o"
 
 "$CC" \
     -ffreestanding \
@@ -38,7 +41,7 @@ echo "==> Compiling kernel..."
     -fno-asynchronous-unwind-tables \
     -fno-unwind-tables \
     -c "$KERNEL_DIR/fbuffer.c" \
-    -o "$KERNEL_DIR/fbuffer.o"
+    -o "$OUTPUT_DIR/fbuffer.o"
 
 "$CC" \
     -ffreestanding \
@@ -50,8 +53,8 @@ echo "==> Compiling kernel..."
     -mno-red-zone \
     -fno-asynchronous-unwind-tables \
     -fno-unwind-tables \
-    -c "$KERNEL_DIR/keyboard.c" \
-    -o "$KERNEL_DIR/keyboard.o"
+    -c "$KERNEL_DIR/handlers.c" \
+    -o "$OUTPUT_DIR/handlers.o"
 
 "$CC" \
     -ffreestanding \
@@ -64,10 +67,12 @@ echo "==> Compiling kernel..."
     -fno-asynchronous-unwind-tables \
     -fno-unwind-tables \
     -c "$KERNEL_DIR/idt.c" \
-    -o "$KERNEL_DIR/idt.o"
+    -o "$OUTPUT_DIR/idt.o"
 
 
-nasm -f elf64 "$KERNEL_DIR/gdt.asm" -o "$KERNEL_DIR/gdt.o"
+"$ASM" -f elf64 "$KERNEL_DIR/gdt.asm" -o "$KERNEL_DIR/gdt.o"
+"$ASM" -f elf64 "$KERNEL_DIR/keyboard.asm" -o "$KERNEL_DIR/keyboard.o"
+
 
 echo "==> Linking kernel..."
 
@@ -75,11 +80,12 @@ echo "==> Linking kernel..."
     -nostdlib \
     -T "$PROJECT_DIR/linker.ld" \
     -o "$PROJECT_DIR/kernel.elf" \
-    "$KERNEL_DIR/main.o" \
-    "$KERNEL_DIR/fbuffer.o" \
-    "$KERNEL_DIR/gdt.o" \
-    "$KERNEL_DIR/idt.o" \
-    "$KERNEL_DIR/keyboard.o"
+    "$OUTPUT_DIR/main.o" \
+    "$OUTPUT_DIR/fbuffer.o" \
+    "$OUTPUT_DIR/gdt.o" \
+    "$OUTPUT_DIR/idt.o" \
+    "$OUTPUT_DIR/keyboard.o" \
+    "$OUTPUT_DIR/keyboardasm.o"
 
 echo "==> Preparing ISO..."
 
