@@ -38,8 +38,8 @@ void idtinit() {
     idtr.limit = (uint16_t)sizeof(struct InterruptDescriptor64);
     idtr.base = (uint64_t)&idt;
 
-    idtgateset(isr_33, 0x08, 0, 0x8E, 33);
-    idtgateset(isr_0, 0x08, 0, 0x8E, 0);
+    for (int i = 0; i < 256; i++) 
+        idtgateset((void *)isr[i], 0x08, 0, 0x8E, i);
 
     asm volatile("lidt %0" : : "m"(idtr));
     asm volatile("sti");

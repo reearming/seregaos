@@ -1,5 +1,5 @@
+#include <stdint.h>
 void interruptdis();
 extern void commonstub();
-extern void isr_0();
-extern void isr_33();
+extern uint64_t isr[256];
 

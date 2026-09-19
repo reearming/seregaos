@@ -19,6 +19,7 @@ section .text
     push r11
     push r12
     push r13
+    push r14
     push r15
 %endmacro
 
@@ -53,11 +54,36 @@ commonstub:
 %macro ISR_NOERRORCODE 1
 global isr_%1
 isr_%1:
-    push qword r10
+    push qword 0
+    push qword %1
+    jmp commonstub
+%endmacro
+
+%macro ISR_ERRORCODE 1
+global isr_%1
+isr_%1:
     push qword %1
     jmp commonstub
 %endmacro
 
 
-ISR_NOERRORCODE 0
-ISR_NOERRORCODE 33
+%assign i 0
+%rep 256
+    %if i == 8 || i == 10 || i == 11 || i == 12 || i == 13 || i == 14 || i == 17 || i == 21
+        ISR_ERRORCODE i
+    %else
+        ISR_NOERRORCODE i
+    %endif
+%assign i i+1
+%endrep
+
+
+section .data
+global isr
+isr:
+%assign i 0
+%rep 256
+    dq isr_%+i
+%assign i i+1
+%endrep
+
