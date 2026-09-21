@@ -69,6 +69,19 @@ echo "==> Compiling kernel..."
     -c "$KERNEL_DIR/idt.c" \
     -o "$OUTPUT_DIR/idt.o"
 
+"$CC" \
+    -ffreestanding \
+    -fno-stack-protector \
+    -fno-pie \
+    -fno-pic \
+    -m64 \
+    -mcmodel=kernel \
+    -mno-red-zone \
+    -fno-asynchronous-unwind-tables \
+    -fno-unwind-tables \
+    -c "$KERNEL_DIR/mathf.c" \
+    -o "$OUTPUT_DIR/mathf.o"
+
 
 "$ASM" -f elf64 "$KERNEL_DIR/gdt.asm" -o "$OUTPUT_DIR/gdt.o"
 "$ASM" -f elf64 "$KERNEL_DIR/handlers.asm" -o "$OUTPUT_DIR/asmhandlers.o"
@@ -85,7 +98,8 @@ echo "==> Linking kernel..."
     "$OUTPUT_DIR/gdt.o" \
     "$OUTPUT_DIR/idt.o" \
     "$OUTPUT_DIR/handlers.o" \
-    "$OUTPUT_DIR/asmhandlers.o"
+    "$OUTPUT_DIR/asmhandlers.o" \
+    "$OUTPUT_DIR/mathf.o"
 
 echo "==> Preparing ISO..."
 

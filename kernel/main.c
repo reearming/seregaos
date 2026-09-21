@@ -3,6 +3,7 @@
 #include "limine.h"
 #include "fbuffer.h"
 #include "idt.h"
+#include "colors.h"
 
 extern void set_gdt();
 
@@ -37,13 +38,14 @@ void kmain(void) {
     struct limine_framebuffer *framebuffer = framebuffer_request.response->framebuffers[0];
 
     framebuffer_init(framebuffer);
-   
-    //asm volatile("ud2"); // invalid opcode
 
-    //int n = 5 / 0; // divide error
+    print("%RRED, %GGREEN, %BBLUE, %WWHITE\n");
 
-    uint32_t *badptr = (uint32_t *)0xdeadbeef; //page fault
-    uint32_t value = *badptr;
+    printf("DEC: %d, HEX: %x, CHAR: %c, STRING: %s\n", 0xFF, 0xFF, 'x', "%GWA%BTER%WME%RLON");
+
+    printf("HERE WILL BE PAGE FAULT: %s", 65);
+
+//    asm("int $0x0A");
 
     for (;;) asm volatile("hlt");
 }
