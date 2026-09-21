@@ -1,7 +1,7 @@
 bits 64
 
 global commonstub
-extern interruptdis
+extern interrupt_dispatcher
 
 section .text
 
@@ -45,7 +45,7 @@ commonstub:
     PUSH_ALL
     
     mov rdi, rsp
-    call interruptdis
+    call interrupt_dispatcher
 
     POP_ALL
     add rsp, 16

@@ -1,7 +1,7 @@
 bits 64
 
 global gdtr
-global setGdt
+global set_gdt
 global gdt_start
 
 section .data
@@ -21,6 +21,9 @@ gdt_start:
 
     ; 5. User Code (0x20)
     dq 0x0020FA0000000000
+    
+    ; 6. TSS (0x28)
+
 gdt_end:
 
 align 4
@@ -29,7 +32,7 @@ gdtr: DW gdt_end - gdt_start - 1 ; For limit storage
 
 section .text
 
-setGdt:
+set_gdt:
     lgdt  [gdtr]
 
     push 0x08                  

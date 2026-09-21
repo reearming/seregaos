@@ -4,7 +4,7 @@
 #include "fbuffer.h"
 #include "idt.h"
 
-extern void setGdt(void);
+extern void set_gdt();
 
 __attribute__((used, section(".limine_requests_start")))
 static volatile uint64_t limine_requests_start_marker[] =
@@ -26,8 +26,8 @@ static volatile uint64_t limine_requests_end_marker[] =
     LIMINE_REQUESTS_END_MARKER;
 
 void kmain(void) {
-    setGdt();
-    idtinit();
+    set_gdt();
+    idt_init();
 
     if (framebuffer_request.response == NULL || framebuffer_request.response->framebuffer_count < 1)
     {
@@ -37,19 +37,13 @@ void kmain(void) {
     struct limine_framebuffer *framebuffer = framebuffer_request.response->framebuffers[0];
 
     framebuffer_init(framebuffer);
-    
-        int a = 5 / 0;
+   
+    //asm volatile("ud2"); // invalid opcode
 
-    
-    /*for (size_t i = 0; i < framebuffer->width; i++)
-    {
-        for (size_t j = 0; j < framebuffer->height; j++) {
-            put_pixel(i, j, 0xFFFFFF, *framebuffer); 
-        }
-    }*/
+    //int n = 5 / 0; // divide error
 
-    //print("THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG\0");
-    //print("A\0");
+    uint32_t *badptr = (uint32_t *)0xdeadbeef; //page fault
+    uint32_t value = *badptr;
 
     for (;;) asm volatile("hlt");
 }

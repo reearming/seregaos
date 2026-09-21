@@ -14,7 +14,7 @@ static inline void io_wait() {
     outb(0x80, 0);
 }
 
-static inline void disablepic() {
+static inline void disable_pic() {
     outb(0x21, 0xFF);
     outb(0xA1, 0xFF);
 }
