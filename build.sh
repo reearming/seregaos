@@ -7,13 +7,22 @@ PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
 KERNEL_DIR="$PROJECT_DIR/kernel"
 ISO_ROOT="$PROJECT_DIR/iso_root"
 ISO="$PROJECT_DIR/serega.iso"
-
 OUTPUT_DIR="$PROJECT_DIR/out"
-mkdir -p "$PROJECT_DIR/out"
+mkdir -p "OUTPUT_DIR"
 
 CC="gcc"
 LD="ld"
 ASM="nasm"
+
+CFLAGS="-ffreestanding \
+    -fno-stack-protector \
+    -fno-pie \
+    -fno-pic \
+    -m64 \
+    -mcmodel=kernel \
+    -mno-red-zone \
+    -fno-asynchronous-unwind-tables \
+    -fno-unwind-tables"
 
 echo "==> Compiling kernel..."
 
@@ -82,10 +91,22 @@ echo "==> Compiling kernel..."
     -c "$KERNEL_DIR/mathf.c" \
     -o "$OUTPUT_DIR/mathf.o"
 
+"$CC" \
+    -ffreestanding \
+    -fno-stack-protector \
+    -fno-pie \
+    -fno-pic \
+    -m64 \
+    -mcmodel=kernel \
+    -mno-red-zone \
+    -fno-asynchronous-unwind-tables \
+    -fno-unwind-tables \
+    -c "$KERNEL_DIR/apic.c" \
+    -o "$OUTPUT_DIR/apic.o"
+
 
 "$ASM" -f elf64 "$KERNEL_DIR/gdt.asm" -o "$OUTPUT_DIR/gdt.o"
 "$ASM" -f elf64 "$KERNEL_DIR/handlers.asm" -o "$OUTPUT_DIR/asmhandlers.o"
-
 
 echo "==> Linking kernel..."
 
@@ -99,7 +120,9 @@ echo "==> Linking kernel..."
     "$OUTPUT_DIR/idt.o" \
     "$OUTPUT_DIR/handlers.o" \
     "$OUTPUT_DIR/asmhandlers.o" \
-    "$OUTPUT_DIR/mathf.o"
+    "$OUTPUT_DIR/mathf.o" \
+    "$OUTPUT_DIR/apic.o" \
+    "$OUTPUT_DIR/cpuid.o" \
 
 echo "==> Preparing ISO..."
 
@@ -109,31 +132,33 @@ mkdir -p "$ISO_ROOT/EFI/BOOT"
 cp "$PROJECT_DIR/kernel.elf" \
    "$ISO_ROOT/boot/kernel.elf"
 
-cp -n /usr/share/limine/limine-bios-cd.bin \
+mkdir -p "$ISO_ROOT/boot"
+mkdir -p "$ISO_ROOT/EFI/BOOT"
+
+cp "$PROJECT_DIR/kernel.elf" \
+   "$ISO_ROOT/boot/kernel.elf"
+
+cp /usr/share/limine/limine-bios-cd.bin \
    "$ISO_ROOT/boot/limine-bios-cd.bin"
 
-cp -n /usr/share/limine/limine-uefi-cd.bin \
+cp /usr/share/limine/limine-uefi-cd.bin \
    "$ISO_ROOT/boot/limine-uefi-cd.bin"
 
-cp -n /usr/share/limine/limine-bios.sys \
+cp /usr/share/limine/limine-bios.sys \
    "$ISO_ROOT/boot/limine-bios.sys"
 
-cp -n /usr/share/limine/BOOTX64.EFI \
+cp /usr/share/limine/BOOTX64.EFI \
    "$ISO_ROOT/EFI/BOOT/BOOTX64.EFI"
 
-if [ ! -f "$ISO_ROOT/limine.conf" ]; then
-    cat > "$ISO_ROOT/limine.conf" <<'EOF'
+cat > "$ISO_ROOT/limine.conf" <<'EOF'
 timeout: 0
 
 /MyOS
     protocol: limine
     path: boot():/boot/kernel.elf
 EOF
-fi
 
 echo "==> Creating ISO..."
-
-rm -f "$ISO"
 
 xorriso -as mkisofs \
     -R -r -J \
@@ -157,4 +182,19 @@ limine bios-install "$ISO"
 echo
 echo "==> Build complete!"
 echo "    Kernel: $PROJECT_DIR/kernel.elf"
-echo "    ISO: $ISO"
+echo "    ISO:    $ISO"
+
+if [[ "$1" == "run" ]]; then
+    echo
+    echo "==> Starting QEMU..."
+
+    cp /usr/share/edk2/x64/OVMF_VARS.4m.fd \
+       /tmp/myos-vars.fd
+
+    qemu-system-x86_64 \
+        -M q35 \
+        -m 256M \
+        -drive if=pflash,format=raw,readonly=on,file=/usr/share/edk2/x64/OVMF_CODE.4m.fd \
+        -drive if=pflash,format=raw,file=/tmp/myos-vars.fd \
+        -cdrom "$ISO"
+fi

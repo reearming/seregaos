@@ -1,33 +1,54 @@
-#include "fbuffer.h"
 #include <stdarg.h>
 #include <stdint.h>
 #include "font.h"
 #include "colors.h"
 #include "mathf.h"
+#include "limine.h"
+#include "stddef.h"
+
+__attribute__((used, section(".limine_requests_start")))
+static volatile uint64_t limine_requests_start_marker[] =
+    LIMINE_REQUESTS_START_MARKER;
+
+__attribute__((used, section(".limine_requests")))
+static volatile uint64_t limine_base_revision[] =
+    LIMINE_BASE_REVISION(6);
+
+static volatile struct limine_framebuffer_request framebuffer_request
+    __attribute__((section(".limine_requests"), used)) =
+{
+    .id = LIMINE_FRAMEBUFFER_REQUEST_ID,
+    .revision = 0
+};
+
+__attribute__((used, section(".limine_requests_end")))
+static volatile uint64_t limine_requests_end_marker[] =
+    LIMINE_REQUESTS_END_MARKER;
 
 static struct limine_framebuffer *framebuffer;
 static uint32_t cursor_x;
 static uint32_t cursor_y;
 
-void framebuffer_init(struct limine_framebuffer *fb)
+
+void framebuffer_init()
 {
-    framebuffer = fb;
+    if (framebuffer_request.response == NULL || framebuffer_request.response->framebuffer_count < 1)
+    {
+        for (;;) asm volatile("hlt");
+    }
+    framebuffer = framebuffer_request.response->framebuffers[0];
     cursor_x = 0;
     cursor_y = 0;
 }
 
-void put_pixel(uint32_t x, uint32_t y, uint32_t color,
-               struct limine_framebuffer fb)
+void put_pixel(uint32_t x, uint32_t y, uint32_t color, struct limine_framebuffer *fb)
 {
-    uint32_t *pixpoint = (uint32_t *)fb.address;
-    pixpoint[x + (y * (fb.pitch / 4))] = color;
+    uint32_t *pixpoint = (uint32_t *)framebuffer->address;
+    pixpoint[x + (y * (fb->pitch / 4))] = color;
 }
 
-void put_char(uint32_t x, uint32_t y, uint32_t color,
-              struct limine_framebuffer fb, const uint8_t letter[])
+void put_char(uint32_t x, uint32_t y, uint32_t color, struct limine_framebuffer *fb, const uint8_t letter[])
 {
-    uint32_t *pixpoint = (uint32_t *)fb.address;
-    
     x += 7;
     for (uint32_t i = 0; i < 8; i++)
     {
@@ -35,7 +56,7 @@ void put_char(uint32_t x, uint32_t y, uint32_t color,
         {
             if (letter[i] >> j & 1)
             {
-                pixpoint[x - j + ((y + i) * fb.pitch / 4)] = color;
+                put_pixel(x - j, y + i, color, fb);
             }
         }
     }
@@ -49,7 +70,7 @@ void print_char(const char c, uint32_t color)
         return;
     }
 
-    put_char(cursor_x, cursor_y, color, *framebuffer, font[c]);
+    put_char(cursor_x, cursor_y, color, framebuffer, font[c]);
     cursor_x += font_advance[c];
 
     if (cursor_x + 8 > framebuffer->width) {
@@ -94,9 +115,6 @@ void print(const char *string)
 }
 
 void print_hex(uint64_t value, uint32_t color) {
-    print_char('0', color);
-    print_char('x', color);
-    
     if (value == 0) {
         print_char('0', color);
         return;

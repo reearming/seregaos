@@ -22,11 +22,11 @@ void stop() {
 }
 
 void print_key() {
-    //uint8_t scancode = inb(0x60);
+    uint8_t scancode = inb(0x60);
 
     print_char('A', 0xFFFFFF);
 
-    //outb(PIC1_COMMAND, PIC_EOI);
+    x2apic_eoi();
 }
 
 void excstop(const char *out) {
@@ -77,33 +77,59 @@ void interrupt_dispatcher(struct interrupt_regs *regs) {
         case 9: break; //segment overrun
                        
         case 10: //invalid tss
-            print("%RINVALID TSS: ");
-            print_hex(regs->errcode, red);
+            printf("%RINVALID TSS: 0x%x", regs->errcode);
             stop();
             break;
 
         case 11: //segment not present
-            print("%RSEGMENT NOT PRESENT: ");
-            print_hex(regs->errcode, red);
+            printf("%RSEGMENT NOT PRESENT: 0x%x", regs->errcode);
             stop();
             break;
 
         case 12: //stack-segment fault
-            print("%RSTACK-SEGMENT FAULT: ");
-            print_hex(regs->errcode, red);
+            printf("%RSTACK-SEGMENT FAULT: 0x%x", regs->errcode);
             stop();
             break;
 
         case 13: //general protection
-            print("%RGENERAL PROTECTION: ");
-            print_hex(regs->errcode, red);
+            printf("%RGENERAL PROTECTION: 0x%x", regs->errcode);
             stop();
             break;
         
         case 14: //page fault
-            print("%RPAGE FAULT: ");
-            print_hex(regs->errcode, red);
+            printf("%RPAGE FAULT: 0x%x", regs->errcode);
             stop();
+            break;
+        case 15: break; //?
+
+        case 16: //floating point error
+            excstop("%RFLOATING-POINT ERROR");
+            break;
+
+        case 17: //alignment check
+            printf("%RALIGNMENT CHECK: 0x%x", regs->errcode);
+            stop();
+            break;
+        
+        case 18: //machine check
+            excstop("MACHINE CHECK, ABORTING...");
+            break;
+
+        case 19: //floating-point exception
+            excstop("%RSIMD FLOATING-POINT EXCEPTION");
+            break;
+
+        case 20: //virtualization exception
+            excstop("%RVIRTUALIZATION EXCEPTION");
+            break;
+
+        case 21: //control protection
+            printf("%RCONTROL PROTECTION: 0x%x", regs->errcode);
+            stop();
+            break;
+
+        case 33:
+            print_key();
             break;
         
         default:

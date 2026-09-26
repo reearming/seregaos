@@ -34,17 +34,18 @@ void idt_gate_set(void *addr, uint16_t selector, uint8_t ist, uint8_t type_attri
 
 void idt_init() {
     struct idtr idtr;
-    idtr.limit = (uint16_t)sizeof(struct interrupt_descriptor64) * 32 - 1;
+    idtr.limit = (uint16_t)sizeof(struct interrupt_descriptor64) * 256 - 1;
     idtr.base = (uint64_t)&idt;
 
-    for (int i = 0; i < 32; i++)
+    for (int i = 0; i < 256; i++)
     {
         if (i == 3)
             idt_gate_set((void *)isr[i], 0x08, 0, 0xFF, i);
-        else
+        else if (i < 32)
             idt_gate_set((void *)isr[i], 0x08, 0, 0x8E, i);
+        else
+            idt_gate_set((void *)isr[i], 0x08, 0, 0x8F, i);
     }
 
     asm volatile("lidt %0" : : "m"(idtr));
-    asm volatile("sti");
 }

@@ -1,4 +1,5 @@
 #include <stdint.h>
+#define X2APIC_EOI_MSR 0x80B
 
 static inline void outb(uint16_t port, uint8_t data) {
     asm volatile("outb %0, %1" : : "a"(data), "Nd"(port));
@@ -12,6 +13,10 @@ static inline uint8_t inb(uint16_t port) {
 
 static inline void io_wait() {
     outb(0x80, 0);
+}
+
+static inline void x2apic_eoi() {
+    asm volatile("wrmsr" : : "c"(X2APIC_EOI_MSR), "a"(0), "d"(0));
 }
 
 static inline void disable_pic() {
