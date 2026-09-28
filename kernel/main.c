@@ -23,14 +23,16 @@ void kmain() {
     
     asm("cli");
     disable_pic();
-    //init_x2apic();
-    init_apic_acpi();
+    init_x2apic();
+    //init_apic_acpi();
     ioapic_keyboard(0x33);
     asm("sti");
 
-    print("%RRED, %GGREEN, %BBLUE, %WWHITE\n");
-    printf("DEC: %d, HEX: %x, CHAR: %c, STRING: %s\n", 0xFF, 0xFF, 'x', "%GWA%BTER%WME%RLON");
+    //print("%RRED, %GGREEN, %BBLUE, %WWHITE\n");
+    //printf("DEC: %d, HEX: %x, CHAR: %c, STRING: %s\n", 0xFF, 0xFF, 'x', "%GWA%BTER%WME%RLON");
     //printf("HERE WILL BE PAGE FAULT: %s", 65);
+    print("THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG\n\n");
+    print("the quick brown fox jumps over the lazy dog");
 
     for (;;) asm volatile("hlt");
 }

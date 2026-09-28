@@ -3,7 +3,9 @@
 #include "fbuffer.h"
 #include "limine.h"
 #include <stddef.h>
+#include <sys/types.h>
 #include "acpi.h"
+#include "page.h"
 
 #define IA32_APIC_BASE_MSR 0x1B
 #define IA32_APIC_BASE_MSR_ENABLE (1 << 11)
@@ -11,6 +13,7 @@
 #define IOAPIC_BASE 0xFEC00000
 #define IOAPIC_REGSEL ((volatile uint32_t *)(IOAPIC_BASE + 0x00))
 #define IOAPIC_WINDOW ((volatile uint32_t *)(IOAPIC_BASE + 0x10))
+
 
 uint64_t hhdm_offset = 0;
 volatile uint32_t *io_apic_regsel = NULL;
@@ -30,16 +33,16 @@ static volatile struct limine_rsdp_request rsdp_request = {
 };
 
 
-void ioapic_write(uint8_t reg, uint32_t val) {
-    if (io_apic_regsel == NULL || io_apic_window == NULL) {
-        printf("%RI/O APIC NOT INITIALIZED!");
-        return;
-    }
-    *IOAPIC_REGSEL = reg;
-    *IOAPIC_WINDOW = val;
+void ioapic_write(uint8_t reg, uint32_t val) { 
+    *io_apic_regsel = reg;
+    *io_apic_window = val;
 }
 
 void ioapic_keyboard(uint8_t vector) {
+    if (io_apic_regsel == NULL || io_apic_window == NULL) {
+        printf("%RI/O APIC NOT INITIALIZED!\n");
+        return;
+    }
     ioapic_write(0x13, target_x2apic_id);
 
     uint32_t low = vector & 0xFF;
@@ -156,6 +159,12 @@ void init_apic_acpi() {
                 io_apic_regsel = (volatile uint32_t *)(virt_io_apic + 0x00);
                 io_apic_window = (volatile uint32_t *)(virt_io_apic + 0x10);
 
+                uint64_t cr3_val;
+                asm("mov %%cr3, %0" : "=r"(cr3_val));
+                uint64_t *pml4 = (uint64_t *)(cr3_val & ~0xFFFULL);
+
+                vmm_map_page(pml4, phys_io_apic, phys_io_apic, PAGE_WRITABLE);
+
                 printf("MAPPED I/O APIC TO VIRT 0x%x\n", virt_io_apic);
                 break;
 
@@ -178,4 +187,5 @@ void init_apic_acpi() {
     }
     printf("ACTIVE CORES: %d\n", cpu_count);
 }
+
 
