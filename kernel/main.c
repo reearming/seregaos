@@ -24,7 +24,7 @@ void kmain() {
     asm("cli");
     disable_pic();
     init_x2apic();
-    //init_apic_acpi();
+    init_apic_acpi();
     ioapic_keyboard(0x33);
     asm("sti");
 

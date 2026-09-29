@@ -159,11 +159,15 @@ void init_apic_acpi() {
                 io_apic_regsel = (volatile uint32_t *)(virt_io_apic + 0x00);
                 io_apic_window = (volatile uint32_t *)(virt_io_apic + 0x10);
 
-                uint64_t cr3_val;
-                asm("mov %%cr3, %0" : "=r"(cr3_val));
-                uint64_t *pml4 = (uint64_t *)(cr3_val & ~0xFFFULL);
+                //uint64_t cr3_val;
+                //asm("mov %%cr3, %0" : "=r"(cr3_val));
+                //uint64_t *pml4 = (uint64_t *)(cr3_val & ~0xFFFULL);
 
-                vmm_map_page(pml4, phys_io_apic, phys_io_apic, PAGE_WRITABLE);
+                //vmm_map_page(pml4, virt_io_apic, phys_io_apic, PAGE_WRITABLE);
+                //asm("invlpg (%0)" : : "r"(0xFEC00000) : "memory");
+                //asm("mov %0, %%cr3" : : "r"(cr3_val) : "memory");
+
+                map_io_apic();
 
                 printf("MAPPED I/O APIC TO VIRT 0x%x\n", virt_io_apic);
                 break;

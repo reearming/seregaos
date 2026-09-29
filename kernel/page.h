@@ -9,5 +9,6 @@
 #define PAGE_LARGE (1ULL << 7)
 
 void vmm_map_page(uint64_t *pml4, uint64_t virt, uint64_t phys, uint64_t flags);
+void map_io_apic();
 
 #endif

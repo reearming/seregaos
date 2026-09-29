@@ -74,3 +74,25 @@ void vmm_map_page(uint64_t *pml4, uint64_t virt, uint64_t phys, uint64_t flags) 
 
     uint64_t ioapic
 }*/
+
+void map_io_apic() {
+    uint64_t cr3_val;
+    asm("mov %%cr3, %0" : "=r"(cr3_val));
+    uint64_t *pml4 = (uint64_t *)(cr3_val & ~0xFFFULL);
+
+    uint64_t pml4_entry = pml4[0];
+    if (!(pml4_entry & 1))
+        return;
+
+    uint64_t *pdpt = (uint64_t *)(pml4_entry & ~0xFFFULL);
+
+    uint64_t pdpt_entry = pdpt[3];
+    if (~(pdpt_entry & 1))
+        return;
+
+    uint64_t *pd = (uint64_t *)(pdpt_entry & ~0xFFFULL);
+
+    pd[7] = 0xFE000000ULL | (1ULL << 0) | (1ULL << 1) | (1ULL << 3) | (1ULL << 4) | (1ULL << 7);
+
+    asm("invlpg (%0)" : : "r"(0xFEC00000ULL) : "memory");
+}
